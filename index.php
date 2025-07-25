@@ -16,18 +16,42 @@ $prices = json_decode(file_get_contents($endpoint), true) ?? [];
             --bg: #0f0f0f;
             --glass: rgba(255, 255, 255, .08);
             --accent: #6366f1;
-            --text: #e5e5e5
+            --text: #e5e5e5;
+            --text-secondary: #a1a1aa;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
         }
 
         body {
-            margin: 0;
-            font-family: Inter, sans-serif;
-            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(-45deg, #0f0f0f, #1a1a2e, #16213e, #0f3460);
+            background-size: 400% 400%;
+            animation: bg 15s ease infinite;
             color: var(--text);
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            min-height: 100vh
+            justify-content: center;
+        }
+
+        @keyframes bg {
+            0% {
+                background-position: 0% 50%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            100% {
+                background-position: 0% 50%
+            }
         }
 
         .glass {
@@ -35,28 +59,32 @@ $prices = json_decode(file_get_contents($endpoint), true) ?? [];
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, .1);
             border-radius: 24px;
-            padding: 2.5rem 3rem;
-            max-width: 480px;
+            padding: 3rem 2.5rem;
+            max-width: 420px;
             width: 100%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, .3)
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .3);
         }
 
         h1 {
+            font-weight: 700;
             text-align: center;
             margin-bottom: 1.5rem;
-            font-weight: 700
+            font-size: 2rem
         }
 
         .price {
+            display: flex;
+            justify-content: space-between;
+            margin: .5rem 0;
             font-size: 1.1rem;
-            margin: .25rem 0
+            letter-spacing: .5px;
         }
 
         form {
-            margin-top: 2rem;
             display: flex;
             flex-direction: column;
-            gap: .75rem
+            gap: .75rem;
+            margin-top: 2rem
         }
 
         input,
@@ -65,8 +93,12 @@ $prices = json_decode(file_get_contents($endpoint), true) ?? [];
             border-radius: 50px;
             border: 1px solid rgba(255, 255, 255, .2);
             background: rgba(255, 255, 255, .05);
-            color: #fff;
+            color: var(--text);
             outline: none
+        }
+
+        input::placeholder {
+            color: var(--text-secondary)
         }
 
         button {
@@ -76,11 +108,14 @@ $prices = json_decode(file_get_contents($endpoint), true) ?? [];
             padding: .75rem 1.5rem;
             border-radius: 50px;
             font-weight: 600;
-            cursor: pointer
+            cursor: pointer;
+            transition: all .3s;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, .4);
         }
 
         button:hover {
-            filter: brightness(1.1)
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(99, 102, 241, .6)
         }
     </style>
 </head>
@@ -91,19 +126,19 @@ $prices = json_decode(file_get_contents($endpoint), true) ?? [];
 
         <!-- Precios -->
         <?php foreach ($prices as $coin => $data): ?>
+            <?php $change = $data['usd_24h_change'] ?? 0; ?>
             <div class="price">
-                <strong><?= ucfirst($coin) ?>:</strong> $<?= number_format($data['usd'], 2) ?>
-                <?php
-                $change = $data['usd_24h_change'] ?? 0;
-                $color  = $change > 0 ? '#4ade80' : '#f87171';
-                ?>
-                <small style="color:<?= $color ?>">
-                    (<?= number_format($change, 2) ?> %)
-                </small>
+                <span><?= ucfirst($coin) ?></span>
+                <span>
+                    $<?= number_format($data['usd'], 2) ?>
+                    <small style="color:<?= $change > 0 ? '#4ade80' : '#f87171' ?>">
+                        <?= $change > 0 ? '+' : '' ?><?= number_format($change, 2) ?> %
+                    </small>
+                </span>
             </div>
         <?php endforeach; ?>
 
-        <!-- Formulario alertas -->
+        <!-- Formulario (sin cambios) -->
         <form method="post" action="save_alert.php">
             <input type="email" name="email" placeholder="Tu email" required>
             <select name="symbol" required>
